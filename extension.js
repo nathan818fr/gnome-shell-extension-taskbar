@@ -222,11 +222,6 @@ TaskBar.prototype =
         this.boxMainSeparatorSix = new St.BoxLayout({ style_class: "tkb-box" });
         this.boxBottomPanelTrayButton = new St.BoxLayout({ style_class: "tkb-box" });
         this.boxBottomPanelOppositeTrayButton = new St.BoxLayout({ style_class: "tkb-box" });
-
-        //Top Panel Background Color
-        this.changeTopPanelBackgroundColor();
-
-        //Set TaskBar Position
         this.onPositionChanged();
 
         //Add Favorites
@@ -267,6 +262,9 @@ TaskBar.prototype =
 
         //Active Task Frame / Background Color
         this.activeTaskFrame();
+
+        //Top Panel Background Color
+        this.changeTopPanelBackgroundColor();
 
         //Init Windows Manage Callbacks
         if (((ShellVersion[1] === 4) || (ShellVersion[1] === 6)) && (! this.settings.get_boolean("tasks-all-workspaces")))
@@ -466,11 +464,11 @@ TaskBar.prototype =
         if (this.mainBox !== null)
             this.mainBox = null;
         this.cleanTasksList();
-        Main.panel.actor.set_style(this.originalTopPanelStyle);
+        Main.panel.actor.set_style("None");
         Main.panel._leftCorner.actor.show();
         Main.panel._rightCorner.actor.show();
-        Main.panel._leftCorner.actor.set_style(this.originalLeftPanelCornerStyle);
-        Main.panel._rightCorner.actor.set_style(this.originalRightPanelCornerStyle);
+        Main.panel._leftCorner.actor.set_style("None");
+        Main.panel._rightCorner.actor.set_style("None");
     },
 
     setSignals: function()
@@ -1144,44 +1142,26 @@ TaskBar.prototype =
     //Top Panel Background Color
     changeTopPanelBackgroundColor: function()
     {
-        this.originalTopPanelStyle = Main.panel.actor.get_style();
-        this.originalLeftPanelCornerStyle = Main.panel._leftCorner.actor.get_style();
-        this.originalRightPanelCornerStyle = Main.panel._rightCorner.actor.get_style();
+        //this.originalTopPanelStyle = Main.panel.actor.get_style();
+        //this.originalLeftPanelCornerStyle = Main.panel._leftCorner.actor.get_style();
+        //this.originalRightPanelCornerStyle = Main.panel._rightCorner.actor.get_style();
         this.blub = this.settings.get_string("font-size");
         this.fontColor = 'color: ' + this.blub + ';';
         this.panelSize = 'font-size: ' + (this.iconSize * 2 / 3) + 'px;';
         this.topPanelBackgroundColor = this.settings.get_string("top-panel-background-color");
-        if (this.topPanelBackgroundColor === "unset")
+        this.topPanelBackgroundStyle = "background-color: " + this.topPanelBackgroundColor;
+        Main.panel.actor.set_style(this.topPanelBackgroundStyle);
+        if (this.settings.get_boolean("top-panel-background-alpha"))
         {
-            //Get Native Panel Background Color
-            let tpobc = Main.panel.actor.get_theme_node().get_background_color();
-            let topPanelOriginalBackgroundColor = 'rgba(%d, %d, %d, %d)'.format(tpobc.red, tpobc.green, tpobc.blue, tpobc.alpha);
-            this.settings.set_string("top-panel-original-background-color", topPanelOriginalBackgroundColor);
-            this.topPanelBackgroundStyle = "background-color: " + topPanelOriginalBackgroundColor + ";";
-            Main.panel.actor.set_style(this.panelSize + ' ' + this.topPanelBackgroundStyle);
-            let children = Main.panel._centerBox.get_children();
-            this.bottomPanelBackgroundColor = this.settings.get_string("bottom-panel-background-color");
-            if (this.bottomPanelBackgroundColor === "unset")
-            {
-                this.settings.set_string("bottom-panel-original-background-color", topPanelOriginalBackgroundColor);
-            }
+            Main.panel._leftCorner.actor.hide();
+            Main.panel._rightCorner.actor.hide();
         }
         else
         {
-            this.topPanelBackgroundStyle = "background-color: " + this.topPanelBackgroundColor + ";";
-            Main.panel.actor.set_style(this.panelSize + ' ' + this.topPanelBackgroundStyle);
-            if (this.settings.get_boolean("top-panel-background-alpha"))
-            {
-                Main.panel._leftCorner.actor.hide();
-                Main.panel._rightCorner.actor.hide();
-            }
-            else
-            {
-                Main.panel._leftCorner.actor.show();
-                Main.panel._rightCorner.actor.show();
-                Main.panel._leftCorner.actor.set_style('-panel-corner-background-color: ' + this.topPanelBackgroundColor + ';');
-                Main.panel._rightCorner.actor.set_style('-panel-corner-background-color: ' + this.topPanelBackgroundColor + ';');
-            }
+            Main.panel._leftCorner.actor.show();
+            Main.panel._rightCorner.actor.show();
+            Main.panel._leftCorner.actor.set_style('-panel-corner-background-color: ' + this.topPanelBackgroundColor);
+            Main.panel._rightCorner.actor.set_style('-panel-corner-background-color: ' + this.topPanelBackgroundColor);
         }
     },
 
@@ -1194,9 +1174,7 @@ TaskBar.prototype =
         this.panelSize = 'font-size: ' + (this.iconSize * 2 / 3) + 'px;';
         this.bottomPanelVertical = this.settings.get_int('bottom-panel-vertical');
         this.bottomPanelBackgroundColor = this.settings.get_string("bottom-panel-background-color");
-        if (this.bottomPanelBackgroundColor === "unset")
-            this.bottomPanelBackgroundColor = this.settings.get_string("bottom-panel-original-background-color");
-        this.bottomPanelBackgroundStyle = "background-color: " + this.bottomPanelBackgroundColor + ";";
+        this.bottomPanelBackgroundStyle = "background-color: " + this.bottomPanelBackgroundColor;
         this.bottomPanelActor = new St.BoxLayout({name: 'bottomPanel'});
         this.bottomPanelActor.set_style(this.panelSize + ' ' + this.bottomPanelBackgroundStyle);
         this.bottomPanelActor.set_reactive(false);
